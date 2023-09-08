@@ -1,0 +1,20 @@
+user_config:
+  # SAVING CHECKPOINTS
+  save_locally: True
+
+  part_name: percmae
+  task_type: mae
+  # Name of the experiment, will be used while saving checkpoints
+  # and generating reports
+  experiment_name: mae_test
+
+  # # ------------------- S3 ARGS -------------------
+  data_dir: null # default: {current_user_home_dir}/percmae_data
+  # ^ could change to e.g. /data/percmae_data instead
+  s3bucket_name: percmae-storage
+  s3key_prefix: null # default: current system username
+
+  # set AWS env variables:
+  aws_key_region: eu
+  data_bucket_region: eu-central-1
+  image_bucket_region: eu-central-1

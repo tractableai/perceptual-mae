@@ -1,0 +1,16 @@
+model_config:
+  name: masked_language_model
+  # ----- language encoder architecture -----
+  language_encoder:
+    name: bert-base-uncased
+    pretrained: True
+    task: mlm
+  
+  # either put all the config entries from default huggingface; or specificaly the entries you'd like to change;
+  lang_model_config:
+    vocab_size: 30522 # vocab size default for Robera= 50265, BERT = 30522
+
+  
+  num_labels: 30522
+
+  load_checkpoint: null  # can be specified relative to user_config.data_dir

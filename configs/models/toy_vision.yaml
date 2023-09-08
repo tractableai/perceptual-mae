@@ -1,0 +1,13 @@
+model_config:
+  name: toy_classifier
+  loss: cross_entropy
+  image_encoder:
+    name: resnet18
+    pretrained: True
+  layers:
+    input_dim: 3
+  classifier:
+    type: mlp
+    params:
+      in_dim: 512
+      logits: 10

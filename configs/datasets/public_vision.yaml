@@ -1,0 +1,46 @@
+dataset_config:
+  dataset_name: imagenet
+  dataset_builder: imagenet_vision
+  download: False
+  save_dir: public_datasets/imagenet  # can be specified as absolute dir, or relative to user_config.data_dir
+  val_samples: 1000
+  max_images: 1
+  
+  preprocess:
+    name: vision
+    vision_transforms:
+      transforms_train:
+        - RandomResizedCrop
+        - RandomHorizontalFlipImageOnly
+        - ToTensor
+        - RandomAugment
+        - Normalise
+      transforms_test:
+        - Resize
+        - ToTensor
+        - Normalise
+      # params must have the same name as 
+      # transforms list above to ensure
+      # parameters are loaded to the right 
+      # transforms class
+      params:
+        RandomResizedCrop: 
+          size: [224, 224] # height, width
+        
+        Resize: 
+          size: [224, 224] # height, width
+
+        ToTensor: null
+        
+        RandomAugment:
+          augment_parameters:
+            - 0.8
+            - 1.2
+            - 0.5
+            - 2.0
+            - 0.8
+            - 1.2
+          do_augmentation: True
+        
+        Normalise: 
+          norm_type: imagenet

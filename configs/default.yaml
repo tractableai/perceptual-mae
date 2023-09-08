@@ -1,0 +1,168 @@
+# Configuration version is useful in migrating older configs to new ones
+config_version: 1.0
+
+# Configuration for the user, default configuration files for user-specific
+# details i.e. AWS credentials, s3 bucket for saving and storing data
+user_config: {}
+
+# Configuration for training
+training:
+    # Name of the trainer class used to define the training/evalution loop
+    # `trl` for default trainer, `lightning` for pytorch lightning trainer
+    # pytorch lightning trainer's params is at `trainer.params`
+    trainer: lightning
+    # Seed to be used for training. -1 means random seed between 1 and 100000.
+    # Either pass fixed through your config or command line arguments
+    # Pass null to the seed if you don't want it seeded anyhow and
+    # want to leave it to default
+    seed: -1
+
+    # load checkpoint:
+    # Size of the batch globally. If distributed or data_parallel
+    # is used, this will be divided equally among GPUs
+    batch_size: 16
+    # Number of workers to be used in dataloaders
+    num_workers: 8
+    # Use in multi-tasking, when you want to sample tasks proportional to their sizes
+    dataset_size_proportional_sampling: true
+    # Whether to pin memory in dataloader
+    pin_memory: false
+    # Whether to use persistent workers in dataloader
+    # (only effective for PyTorch 1.8 or higher which supports persistent_workers)
+    persistent_workers: true
+
+    # Device on which the model will be trained. Set 'cpu' to train/infer on CPU
+    test_device: cuda:0
+
+    # Local rank of the GPU device
+    local_rank: null
+    # If verbose dump is active, MMF will dump dataset, model specific
+    # information which can be useful in debugging
+    verbose_dump: false
+
+    # Turn on if you want to ignore unused parameters in case of DDP
+    find_unused_parameters: False
+
+    # Users can define their own callback functions in the trainer, e.g. adjust
+    # learning rate, plot data in tensorboard, etc.
+    # The format should look like:
+    # callbacks:
+    #   - type: my_callback
+    #     params:
+    #     params:
+    #       foo: bar
+    callbacks:
+        #- type: GPUStatsMonitor
+        #  params:
+        #    memory_utilization: True
+        #    gpu_utilization: True 
+        #    intra_step_time: False 
+        #    fan_speed: False 
+        #    temperature: False
+        - type: CheckpointEveryNSteps
+          params:
+            save_step_frequency: 6000
+            prefix: "iter"
+        #- type: EarlyStopping
+        #  params:
+        #    monitor: val_accuracy
+        #    patience: 3 
+        #    verbose: False 
+        #    min_delta: 0.00 
+        #    mode: max
+    # IF NOT HARD CODED: CHECK THE MODEL CODE < SOMETIMES I HARD CODED IT IN >
+    metrics:
+        - type: Accuracy
+          params:
+            num_classes: 12
+            average: macro
+        - type: Precision
+          params:
+            num_classes: 12
+            average: macro
+        - type: F1Score
+          params:
+            num_classes: 12
+            average: macro
+        - type: Recall
+          params:
+            num_classes: 12
+            average: macro
+
+
+    # check for NaNs in losses during training
+    # Set to true to look for NaNs in the losses and exit the training when NaN happens
+    exit_on_nan_losses: true
+
+trainer:
+    # Name of the trainer class used to define the training/evalution loop
+    # `trl` or `lightning` to specify the trainer to be used
+    # `trl` for trl trainer,
+    # for trl trainer params, please see training params in the `training` config (listed above)
+    # `lightning` for Pytorch Lightning trainer
+    # for lightning trainer params, please see lightning doc for details: ie.,
+    # https://pytorch-lightning.readthedocs.io/en/latest/trainer.html#trainer-class-api
+    type: lightning
+    params:
+        accelerator: 'gpu'
+        devices: -1  # [1,2,3] # [id1, id2 ...] for selecting specific GPUs, -1 for all gpus
+        num_nodes: 1
+        precision: 32
+        deterministic: false
+        benchmark: false
+        max_steps: -1
+        max_epochs: 300
+        gradient_clip_val: 0.0
+        num_sanity_val_steps: 0
+        #checkpoint_callback: true
+        accumulate_grad_batches: 1
+        #check_val_every_n_epoch: 1 # 2cd ~/Co000
+        val_check_interval: 12000
+        log_every_n_steps: 300 # 300
+        enable_checkpointing: True
+        strategy: ddp
+        #replace_sampler_ddp: True
+        limit_val_batches: 1.0
+        # set to 0 if you want progress bar to be turned off
+        enable_progress_bar: True #100
+
+
+# Configuration for models, default configuration files for various models
+# included in MMF can be found under configs directory in root folder
+model_config: {}
+
+# Configuration for datasets. Separate configuration
+# for different datasets check dataset folder for the relevant config
+# which can be mixed and matched to train multiple datasets together
+# An example for mixing all vqa datasets is present under vqa folder
+dataset_config: {}
+
+# OPTIMIZER & SCHEDULER CHANGED TO BE HARD CODED IN THE MODEL TO ALLOW FOR REPRODUCIBILITY
+
+# Configuration for optimizer, examples can be found in models' configs in
+# configs folder
+#optimizer: 
+#    type: AdamW
+#    params: 
+#        learning_rate: 1e-4 #5e-5 nlp
+#        eps: 1e-8
+#        weight_decay: 0.05
+#        base_learning_rate: 1e-3 
+        # base learning rate: absolute_lr = base_lr * total_batch_size / 256
+#        min_learning_rate: 0.
+        # lower lr bound for cyclic schedulers that hit 0
+
+    # Whether to allow some of the model's parameters not to be used by the
+    # optimizer. Default is false to guard against missing parameters due to
+    # implementation errors in a model's get_optimizer_parameters
+#    allow_unused_parameters: false
+    # Whether to enable optimizer state sharding. It uses ZeRO optimizer state
+    # sharding method as described here https://arxiv.org/abs/1910.02054.
+#    enable_state_sharding: false
+
+# Configuration for scheduler, examples can be found in models' configs
+#scheduler: 
+#    type: ExponentialLR
+#    params:
+#        gamma: 0.9
+#        num_warmup_steps: 40

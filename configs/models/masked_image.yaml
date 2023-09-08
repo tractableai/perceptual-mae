@@ -1,0 +1,71 @@
+model_config:
+  # masked_image_autoencoder / masked_image_autoencoder_gan / masked_image_autoencoder_msg_gan
+  name: masked_image_autoencoder
+  # if using tractable data; then custom forward function is used;
+  # if using public data; a different forward propagation is used.
+
+
+  # ----- image encoder architecture -----
+  # base encoder: embed_dim=768, depth=12, num_heads=12
+  # large encoder: embed_dim=1024, depth=24, num_heads=16
+  image_encoder:
+    patch_size: 16  # 12 was for 600x600
+    in_channels: 3 
+    embed_dim: 768 # if using base vit model, embed_dim = 768; if using large, embed_dim=1024
+    depth: 12 # num layers of vit, for base: 12, for large: 24
+    mlp_ratio: 4
+    num_heads: 12  # for base, num_heads=12; for large, num_heads=16
+
+  image_decoder:
+    decoder_embed_dim: 512
+    decoder_depth: 8
+    decoder_num_heads: 16
+
+  image_loss_weightings:
+    ssim: 0.85
+    style: 40.0
+    perc: 0.05
+    gan: 0.7 
+    l1: 1.0
+
+  discriminator:
+    depth: 6 # no. of conv blocks in the discriminator, 6 should be max; otherwise the image will be as small as 3x3 for which loss will be too shallow (almost zero)
+    conv_layer_type: default #equal / default
+    feature_size_ndf: 512
+    input_channels_nc: 3
+    gan_arch_type: msg # using single scale / MSG (multi scale) discriminator architecture. the args above are specifically for MSG GAN
+    # for single scale; architecture is set (similar to DC GAN). Change arh gan_arch_type to ensure loss functions run correctly.
+
+  style_gan_args:
+    r1_gamma: 10
+    r1_interval: 16
+    pl_weight: 2
+    pl_decay: 0.01
+    upper_threshold: 0.85
+    lower_threshold: 0.6
+    adjust_factor: 0.05
+    recon_weight: 1.0
+
+  dall_e:
+    model_dir: pretrained_perceptual/dall_e
+    # if model weights not stored; use the following link to store: 
+    # https://cdn.openai.com/dall-e/decoder.pkl
+    # https://cdn.openai.com/dall-e/encoder.pkl
+    
+  normalisation_params: tractable
+  norm_layer_arg: partial
+  mask_ratio: 0.75 # Masking ratio (percentage of removed patches).
+  loss_type: perceptual # mae, ssim, perceptual, gan, gan_perceptual
+  feature_extractor: vgg # only applicable for the perceptual loss; uses VGG16 as default
+  gan_loss_type: style # std, ls, wgan, style (std i.e. OG GANs are notoriously unstable; use LS / WGAN instead), 
+  norm_pix_loss: False # Use (per-patch) normalized pixels as targets for computing loss (NOT NEEDED though; works fine without)
+  
+  finetune_imagenet: null # finetune using imagenet weights, arg= path to the local directory with imagenet weights
+  # make arg: null if you do not want to finetune; you will be pretraining from scratch (rand weights)
+  # to use this; ensure pretrained weights from https://github.com/facebookresearch/mae
+  # are downloaded and the path to the relevant directory is provided
+
+  num_samples_to_visualise: 1 # number of samples to visualise in callbacks
+  frequency_to_visualise: 6000
+
+  load_checkpoint: null  # can be specified relative to user_config.data_dir

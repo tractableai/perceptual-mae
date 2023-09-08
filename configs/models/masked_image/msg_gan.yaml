@@ -1,0 +1,7 @@
+model_config:
+  name: masked_image_autoencoder_msg_gan
+  loss_type: gan_perceptual
+  gan_loss_type: ls
+
+  discriminator:
+    gan_arch_type: msg

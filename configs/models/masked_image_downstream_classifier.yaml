@@ -1,0 +1,36 @@
+model_config:
+  name: vit_downstream # 'vit_downstraeam' is for masked_image model only, 'vision_language_vit_downstream' is for masked vision and language model backbone
+  data_type: imagenet # if anything other than custom data; i.e. cifar, imagenet etc. Standard ViT model is used.
+  train_task: downstream_classifier # define whether to train a 'linear_probe' or 'downstream_classifier'
+  # in linear_probe: backbone is frozen, only a single fully connected classifier is trained
+  # in downstream_classifier: the entire model (backbone + new classification model) is trained
+
+  # base encoder: embed_dim=768, depth=12, num_heads=12
+  # large encoder: embed_dim=1024, depth=24, num_heads=16
+
+  # ----- image encoder architecture -----
+  image_encoder:
+    patch_size: 16 
+    in_channels: 3 
+    embed_dim: 768 # if using base vit model, embed_dim = 768; if using large, embed_dim=1024
+    depth: 12 # num layers of vit, for base: 12, for large: 24
+    mlp_ratio: 4
+    num_heads: 12  # for base, num_heads=12; for large, num_heads=16
+
+  # downstream classifier args
+  # ----- transformer params -----
+  transformer:
+    d_model: 768
+    nhead: 8
+    dim_feedforward: 768
+    dropout_rate: 0.1
+    depth: 3
+  # ----- classifier params -----
+  classifier:
+    type: mlp
+    in_dim: 768
+    num_classes: 1000
+
+  norm_layer_arg: partial
+  load_pretrained_mae: null  # can be specified relative to user_config.data_dir
+  load_checkpoint: null  # can be specified relative to user_config.data_dir

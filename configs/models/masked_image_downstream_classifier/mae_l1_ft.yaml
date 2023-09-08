@@ -1,0 +1,2 @@
+model_config:
+  load_pretrained_mae: mae_l1/train_outputs/sample-epoch=030-val_loss=0.31.ckpt
