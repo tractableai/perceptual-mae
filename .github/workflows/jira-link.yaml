@@ -1,0 +1,13 @@
+name: Fetch linked Jira issue
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - edited
+jobs:
+  fetch-linked-jira-ticket:
+    if: github.actor != 'dependabot[bot]' # to avoid running it on Dependabot PRs
+    uses: tractableai/org-workflows/.github/workflows/fetch-linked-jira-ticket.yaml@main
+    secrets: inherit
